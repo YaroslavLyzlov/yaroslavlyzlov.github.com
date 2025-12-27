@@ -272,9 +272,227 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
+        .celebration-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+            opacity: 1;
+        }
+        
+        .heart {
+            position: absolute;
+            font-size: 30px;
+            animation: floatUp 3s ease-in forwards;
+            opacity: 0;
+        }
+        
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) scale(1.5);
+                opacity: 0;
+            }
+        }
+        
+        .firework {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: explode 1s ease-out forwards;
+        }
+        
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty));
+                opacity: 0;
+            }
+        }
+        
+        .final-message {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, rgba(30, 58, 138, 0.95) 0%, rgba(30, 64, 175, 0.95) 100%);
+            z-index: 10000;
+            opacity: 0;
+            backdrop-filter: blur(10px);
+        }
+        
+        .final-message.show {
+            display: flex;
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+        
+        .final-message-content {
+            text-align: center;
+            animation: scaleAndGlow 1s ease-out forwards;
+            transform: scale(0);
+            position: relative;
+            z-index: 2;
+        }
+        
+        .final-message-text {
+            font-family: 'Caveat', cursive;
+            font-size: 6em;
+            color: white;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 0.5),
+                         0 0 40px rgba(255, 255, 255, 0.3),
+                         0 0 60px rgba(255, 107, 107, 0.4);
+            margin: 0;
+            line-height: 1.2;
+        }
+        
+        .final-message-emoji {
+            font-size: 1.5em;
+            display: inline-block;
+            animation: heartBeat 1s ease-in-out infinite;
+        }
+        
+        @keyframes fadeIn {
+            0% {
+                opacity: 0;
+            }
+            100% {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes scaleAndGlow {
+            0% {
+                transform: scale(0) rotate(-10deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.1) rotate(2deg);
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes heartBeat {
+            0%, 100% {
+                transform: scale(1);
+            }
+            25% {
+                transform: scale(1.2);
+            }
+            50% {
+                transform: scale(1);
+            }
+            75% {
+                transform: scale(1.15);
+            }
+        }
+        
         @media (max-width: 768px) {
+            body {
+                padding: 20px 10px;
+            }
+            
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .header h1 {
+                font-size: 2.5em;
+            }
+            
+            .header .date {
+                font-size: 1.1em;
+            }
+            
+            .team-section {
+                padding: 30px 20px;
+            }
+            
+            .team-title {
+                font-size: 2em;
+                margin-bottom: 30px;
+            }
+            
             .team-grid {
                 grid-template-columns: 1fr;
+                gap: 30px;
+            }
+            
+            .team-photo {
+                height: 250px;
+            }
+            
+            .team-closing {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .day-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .day-number {
+                font-size: 3em;
+                margin-bottom: 10px;
+            }
+            
+            .day-info h2 {
+                font-size: 1.5em;
+            }
+            
+            .location-card {
+                padding: 20px;
+            }
+            
+            .location-card h3 {
+                font-size: 1.4em;
+            }
+            
+            .photo-placeholder {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .photo-box {
+                height: 200px;
+            }
+            
+            .footer {
+                padding: 30px 20px;
+                font-size: 1.5em;
+            }
+            
+            .final-message-text {
+                font-size: 3em;
+                padding: 0 20px;
+            }
+            
+            .heart {
+                font-size: 20px;
             }
         }
         
@@ -528,5 +746,106 @@
             Незабываемые воспоминания навсегда в наших сердцах! ❤️✨
         </div>
     </div>
+    
+    <div class="final-message" id="finalMessage">
+        <div class="celebration-overlay" id="celebrationOverlay"></div>
+        <div class="final-message-content">
+            <h1 class="final-message-text">
+                Будет клево, зай! <span class="final-message-emoji">❤️</span>
+            </h1>
+        </div>
+    </div>
+    
+    <script>
+        let celebrationTriggered = false;
+        
+        function createHeart() {
+            const heart = document.createElement('div');
+            heart.className = 'heart';
+            heart.textContent = '❤️';
+            heart.style.left = Math.random() * 100 + '%';
+            heart.style.bottom = '-50px';
+            heart.style.animationDelay = Math.random() * 0.5 + 's';
+            return heart;
+        }
+        
+        function createFirework(x, y) {
+            const colors = ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7', '#fd79a8'];
+            const particles = 30;
+            
+            for (let i = 0; i < particles; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.left = x + 'px';
+                firework.style.top = y + 'px';
+                firework.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                
+                const angle = (Math.PI * 2 * i) / particles;
+                const velocity = 50 + Math.random() * 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                
+                firework.style.setProperty('--tx', tx + 'px');
+                firework.style.setProperty('--ty', ty + 'px');
+                
+                document.getElementById('celebrationOverlay').appendChild(firework);
+                
+                setTimeout(() => firework.remove(), 1000);
+            }
+        }
+        
+        function startCelebration() {
+            if (celebrationTriggered) return;
+            celebrationTriggered = true;
+            
+            const overlay = document.getElementById('celebrationOverlay');
+            const message = document.getElementById('finalMessage');
+            
+            overlay.classList.add('active');
+            
+            // Создаем сердечки
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    overlay.appendChild(createHeart());
+                }, i * 150);
+            }
+            
+            // Создаем салют
+            const fireworkTimes = [500, 800, 1100, 1400, 1700];
+            fireworkTimes.forEach(time => {
+                setTimeout(() => {
+                    const x = Math.random() * window.innerWidth;
+                    const y = Math.random() * (window.innerHeight * 0.6);
+                    createFirework(x, y);
+                }, time);
+            });
+            
+            // Показываем финальное сообщение сразу
+            message.classList.add('show');
+            
+            // Убираем сердечки через 4 секунды
+            setTimeout(() => {
+                const hearts = overlay.querySelectorAll('.heart');
+                hearts.forEach(heart => heart.remove());
+            }, 4000);
+        }
+        
+        function checkScroll() {
+            const footer = document.querySelector('.footer');
+            const footerPosition = footer.getBoundingClientRect();
+            const windowHeight = window.innerHeight;
+            
+            // Проверяем, виден ли футер
+            if (footerPosition.top < windowHeight && footerPosition.bottom >= 0) {
+                startCelebration();
+            }
+        }
+        
+        // Слушаем прокрутку
+        window.addEventListener('scroll', checkScroll);
+        
+        // Проверяем при загрузке страницы
+        window.addEventListener('load', checkScroll);
+    </script>
 </body>
 </html>
